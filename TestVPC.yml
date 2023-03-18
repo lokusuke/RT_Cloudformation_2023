@@ -122,3 +122,23 @@ Resources:
     Properties: 
       RouteTableId: !Ref TestPrivateRouteTable
       SubnetId: !Ref TestPrivateSubnet1a
+
+#VPC,Subnet IDを外部にアウトプット
+Outputs:
+  TestVPC:
+    Description: Information about the "TestVPC"
+    Value: !Ref TestVPC
+    Export: 
+      Name: !Sub ${AWS::StackName}-VpcID
+  
+  TestPublicSubnet1a:
+    Description: Information about the "TestPublicSubnet1a"
+    Value: !Ref TestPublicSubnet1a
+    Export: 
+      Name: !Sub ${AWS::StackName}-PublicSubnetID
+  
+  TestPrivateSubnet1a:
+    Description: Information about the "TestPrivateSubnet1a"
+    Value: !Ref TestPrivateSubnet1a
+    Export: 
+      Name: !Sub ${AWS::StackName}-PrivateSubnetID
