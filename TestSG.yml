@@ -1,0 +1,84 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: create vpc and subnet
+
+#公開webサーバー用セキュリティグループ(http,puma,ssh)
+Resources:
+  TestWebSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: security group for the http server
+      GroupName: Test-web-sg
+      SecurityGroupIngress: 
+        -   CidrIp: "0.0.0.0/0"
+            Description: for http connection
+            FromPort: 80
+            ToPort: 80
+            IpProtocol: tcp
+        -   CidrIp: "118.86.184.239/32"
+            Description: for puma connection
+            FromPort: 3000
+            ToPort: 3000
+            IpProtocol: tcp
+      Tags: 
+        - Key: environment
+          Value: test
+        - Key: Name
+          Value: Test-web-sg
+      VpcId: !ImportValue TestVPC-VpcID
+
+  TestSSHSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: security group for the ssh connection
+      GroupName: Test-ssh-sg
+      SecurityGroupIngress: 
+        -   CidrIp: "118.86.184.239/32"
+            Description: for http connection
+            FromPort: 22
+            ToPort: 22
+            IpProtocol: tcp
+      Tags: 
+        - Key: environment
+          Value: test
+        - Key: Name
+          Value: Test-ssh-sg
+      VpcId: !ImportValue TestVPC-VpcID
+
+#DBサーバー用セキュリティグループ(mysql)
+  TestDBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: security group for the db server
+      GroupName: Test-db-sg
+      SecurityGroupIngress: 
+        -   SourceSecurityGroupId: !GetAtt TestWebSecurityGroup.GroupId
+            Description: for db connection 
+            FromPort: 3306
+            ToPort: 3306
+            IpProtocol: tcp
+      Tags: 
+        - Key: environment
+          Value: test
+        - Key: Name
+          Value: Test-db-sg
+      VpcId: !ImportValue TestVPC-VpcID
+
+Outputs:
+  TestWebSecurityGroup:
+    Description: Information about the "TestWebSecurityGroup"
+    Value: !GetAtt TestWebSecurityGroup.GroupId
+    Export: 
+      Name: !Sub ${AWS::StackName}-TestWebSecurityGroupID
+
+  TestSSHSecurityGroup:
+    Description: Information about the "TestSSHSecurityGroup"
+    Value: !GetAtt TestSSHSecurityGroup.GroupId
+    Export: 
+      Name: !Sub ${AWS::StackName}-TestSSHSecurityGroupID
+
+  TestDBSecurityGroup:
+    Description: Information about the "TestDBSecurityGroup"
+    Value: !GetAtt TestDBSecurityGroup.GroupId
+    Export: 
+      Name: !Sub ${AWS::StackName}-TestDBSecurityGroupID
+
