@@ -49,13 +49,13 @@ Resources:
       InternetGatewayId: !Ref TestInternetGateway
       VpcId: !Ref TestVPC
 
-#パブリックサブネット作成
+#パブリックサブネット作成(1a)
   TestPublicSubnet1a:
     Type: AWS::EC2::Subnet
     Properties: 
       AvailabilityZone: "ap-northeast-1a"
-      #GetAtt関数でTestVPCのCIDRを取得し、Cidr関数で/24のサブネットを３つ作成し、さらに1番目のサブネットを指定(10.1.0.0/24)
-      CidrBlock: !Select [0, !Cidr [!GetAtt TestVPC.CidrBlock, 3, 8]]  
+      #GetAtt関数でTestVPCのCIDRを取得し、Cidr関数で/24のサブネットを4つ作成し、さらに1番目のサブネットを指定(10.1.0.0/24)
+      CidrBlock: !Select [0, !Cidr [!GetAtt TestVPC.CidrBlock, 4, 8]]  
       MapPublicIpOnLaunch: true
       Tags: 
         - Key: environment
@@ -64,19 +64,48 @@ Resources:
           Value: test-public-subnet-1a
       VpcId: !Ref TestVPC
       
-#プライベートサブネット作成
+#パブリックサブネット作成(1c)
+  TestPublicSubnet1c:
+    Type: AWS::EC2::Subnet
+    Properties: 
+      AvailabilityZone: "ap-northeast-1c"
+      #GetAtt関数でTestVPCのCIDRを取得し、Cidr関数で/24のサブネットを4つ作成し、さらに1番目のサブネットを指定(10.1.0.0/24)
+      CidrBlock: !Select [2, !Cidr [!GetAtt TestVPC.CidrBlock, 4, 8]]  
+      MapPublicIpOnLaunch: true
+      Tags: 
+        - Key: environment
+          Value: test
+        - Key: Name
+          Value: test-public-subnet-1c
+      VpcId: !Ref TestVPC
+
+#プライベートサブネット作成(1a)
   TestPrivateSubnet1a:
     Type: AWS::EC2::Subnet
     Properties: 
       AvailabilityZone: "ap-northeast-1a"
-      #GetAtt関数でTestVPCのCIDRを取得し、Cidr関数で/24のサブネットを３つ作成し、さらに2番目のサブネットを指定(10.1.1.0/24)
-      CidrBlock: !Select [1, !Cidr [!GetAtt TestVPC.CidrBlock, 3, 8]]  
+      #GetAtt関数でTestVPCのCIDRを取得し、Cidr関数で/24のサブネットを4つ作成し、さらに2番目のサブネットを指定(10.1.1.0/24)
+      CidrBlock: !Select [1, !Cidr [!GetAtt TestVPC.CidrBlock, 4, 8]]  
       MapPublicIpOnLaunch: true
       Tags: 
         - Key: environment
           Value: test
         - Key: Name
           Value: test-private-subnet-1a
+      VpcId: !Ref TestVPC
+
+#プライベートサブネット作成(1c)
+  TestPrivateSubnet1c:
+    Type: AWS::EC2::Subnet
+    Properties: 
+      AvailabilityZone: "ap-northeast-1c"
+      CidrBlock: !Select [3, !Cidr [!GetAtt TestVPC.CidrBlock, 4, 8]]  
+      MapPublicIpOnLaunch: true
+      Tags: 
+        - Key: environment
+          Value: test
+        - Key: Name
+          Value: test-private-subnet-1c
       VpcId: !Ref TestVPC
 
 #パブリックサブネット用ルートテーブル作成
@@ -109,19 +138,33 @@ Resources:
       GatewayId: !Ref TestInternetGateway
       RouteTableId: !Ref TestPublicRouteTable
 
-#ルートテーブルをパブリックサブネットにアタッチ
+#ルートテーブルをパブリックサブネットにアタッチ(1a)
   TestPublicRouteAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties: 
       RouteTableId: !Ref TestPublicRouteTable
       SubnetId: !Ref TestPublicSubnet1a
 
-#ルートテーブルをプライベートサブネットにアタッチ
+#ルートテーブルをパブリックサブネットにアタッチ(1c)
+  TestPublicRouteAssociation1c:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      RouteTableId: !Ref TestPublicRouteTable
+      SubnetId: !Ref TestPublicSubnet1c
+
+#ルートテーブルをプライベートサブネットにアタッチ(1a)
   TestPrivateRouteAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties: 
       RouteTableId: !Ref TestPrivateRouteTable
       SubnetId: !Ref TestPrivateSubnet1a
+
+#ルートテーブルをプライベートサブネットにアタッチ(1c)
+  TestPrivateRouteAssociation1c:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      RouteTableId: !Ref TestPrivateRouteTable
+      SubnetId: !Ref TestPrivateSubnet1c
 
 #VPC,Subnet IDを外部にアウトプット
 Outputs:
@@ -141,4 +184,10 @@ Outputs:
     Description: Information about the "TestPrivateSubnet1a"
     Value: !Ref TestPrivateSubnet1a
     Export: 
-      Name: !Sub ${AWS::StackName}-PrivateSubnetID
+      Name: !Sub ${AWS::StackName}-PrivateSubnet1aID
+
+  TestPrivateSubnet1c:
+    Description: Information about the "TestPrivateSubnet1c"
+    Value: !Ref TestPrivateSubnet1c
+    Export: 
+      Name: !Sub ${AWS::StackName}-PrivateSubnet1cID
