@@ -70,7 +70,7 @@ Resources:
     Properties: 
       AvailabilityZone: "ap-northeast-1c"
       #GetAtt関数でTestVPCのCIDRを取得し、Cidr関数で/24のサブネットを4つ作成し、さらに1番目のサブネットを指定(10.1.0.0/24)
-      CidrBlock: !Select [2, !Cidr [!GetAtt TestVPC.CidrBlock, 4, 8]]  
+      CidrBlock: !Select [2,!Cidr [!GetAtt TestVPC.CidrBlock, 4, 8]]
       MapPublicIpOnLaunch: true
       Tags: 
         - Key: environment
