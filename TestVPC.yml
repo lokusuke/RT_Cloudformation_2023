@@ -10,13 +10,25 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: create vpc and subnet
 
-#CIDRパラメータ入力用
+#パラメータ入力用
 Parameters:
+  SystemName:
+    Description: What do you plan to name this system ?(e.g. WebSystem)
+    Type: String
+  
+  Environment:
+    Description: what environment will it be used(choose one) ?
+    Type: String
+    AllowedValues:
+      - prod
+      - test
+      - dev
+
   CidrBlock:
-    Description: type the CidrBlock.
+    Description: type the subnet range you will use(CIDR).
     Type: String
     Default: 10.1.0.0/16
-  
+
 Resources:
 #テスト環境用のVPC作成
   TestVPC:
@@ -28,9 +40,9 @@ Resources:
       InstanceTenancy: "default"
       Tags: 
         - Key: environment
-          Value: test
+          Value: !Sub ${Environment}
         - Key: Name
-          Value: test-vpc
+          Value: !Sub ${SystemName}-${Environment}-vpc
 
 #テスト環境用VPCインターネットゲートウェイ作成
   TestInternetGateway:
@@ -38,9 +50,9 @@ Resources:
     Properties: 
       Tags: 
         - Key: environment
-          Value: test
+          Value: !Sub ${Environment}
         - Key: Name
-          Value: test-igw
+          Value: !Sub ${SystemName}-${Environment}-igw
 
 #テスト環境用VPCにインターネットゲートウェイをアタッチ
   TestInternetGatewayAttachment:
@@ -59,9 +71,9 @@ Resources:
       MapPublicIpOnLaunch: true
       Tags: 
         - Key: environment
-          Value: test
+          Value: !Sub ${Environment}
         - Key: Name
-          Value: test-public-subnet-1a
+          Value: !Sub ${SystemName}-${Environment}-pubric-subnet01
       VpcId: !Ref TestVPC
       
 #パブリックサブネット作成(1c)
@@ -70,13 +82,13 @@ Resources:
     Properties: 
       AvailabilityZone: "ap-northeast-1c"
       #GetAtt関数でTestVPCのCIDRを取得し、Cidr関数で/24のサブネットを4つ作成し、さらに1番目のサブネットを指定(10.1.0.0/24)
-      CidrBlock: !Select [2, !Cidr [!GetAtt TestVPC.CidrBlock, 4, 8]]  
+      CidrBlock: !Select [2,!Cidr [!GetAtt TestVPC.CidrBlock, 4, 8]]
       MapPublicIpOnLaunch: true
       Tags: 
         - Key: environment
-          Value: test
+          Value: !Sub ${Environment}
         - Key: Name
-          Value: test-public-subnet-1c
+          Value: !Sub ${SystemName}-${Environment}-public-subnet02
       VpcId: !Ref TestVPC
 
 #プライベートサブネット作成(1a)
@@ -89,9 +101,9 @@ Resources:
       MapPublicIpOnLaunch: true
       Tags: 
         - Key: environment
-          Value: test
+          Value: !Sub ${Environment}
         - Key: Name
-          Value: test-private-subnet-1a
+          Value: !Sub ${SystemName}-${Environment}-private-subnet01
       VpcId: !Ref TestVPC
 
 #プライベートサブネット作成(1c)
@@ -103,9 +115,9 @@ Resources:
       MapPublicIpOnLaunch: true
       Tags: 
         - Key: environment
-          Value: test
+          Value: !Sub ${Environment}
         - Key: Name
-          Value: test-private-subnet-1c
+          Value: !Sub ${SystemName}-${Environment}-private-subnet02
       VpcId: !Ref TestVPC
 
 #パブリックサブネット用ルートテーブル作成
@@ -113,21 +125,10 @@ Resources:
     Type: AWS::EC2::RouteTable
     Properties: 
       Tags: 
-      - Key: environment
-        Value: test
-      - Key: Name
-        Value: test-public-routetable
-      VpcId: !Ref TestVPC
-
-#プライベートサブネット用ルートテーブル作成
-  TestPrivateRouteTable:
-    Type: AWS::EC2::RouteTable
-    Properties: 
-      Tags: 
-      - Key: environment
-        Value: test
-      - Key: Name
-        Value: test-private-routetable
+        - Key: environment
+          Value: !Sub ${Environment}
+        - Key: Name
+          Value: !Sub ${SystemName}-${Environment}-rtb
       VpcId: !Ref TestVPC
 
 #パブリックサブネット用ルート作成
@@ -151,20 +152,6 @@ Resources:
     Properties: 
       RouteTableId: !Ref TestPublicRouteTable
       SubnetId: !Ref TestPublicSubnet1c
-
-#ルートテーブルをプライベートサブネットにアタッチ(1a)
-  TestPrivateRouteAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties: 
-      RouteTableId: !Ref TestPrivateRouteTable
-      SubnetId: !Ref TestPrivateSubnet1a
-
-#ルートテーブルをプライベートサブネットにアタッチ(1c)
-  TestPrivateRouteAssociation1c:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties: 
-      RouteTableId: !Ref TestPrivateRouteTable
-      SubnetId: !Ref TestPrivateSubnet1c
 
 #VPC,Subnet IDを外部にアウトプット
 Outputs:
