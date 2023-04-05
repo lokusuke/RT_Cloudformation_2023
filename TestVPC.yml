@@ -73,7 +73,7 @@ Resources:
         - Key: environment
           Value: !Sub ${Environment}
         - Key: Name
-          Value: !Sub ${SystemName}-${Environment}-pubric-subnet01
+          Value: !Sub ${SystemName}-${Environment}-public-subnet01
       VpcId: !Ref TestVPC
       
 #パブリックサブネット作成(1c)
