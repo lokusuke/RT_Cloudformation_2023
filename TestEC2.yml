@@ -69,7 +69,7 @@ Resources:
             Statement:
               - Effect: Allow
                 Action: 'secretsmanager:GetSecretValue'
-                Resource: 'arn:aws:secretsmanager:ap-northeast-1:896558704119:secret:RailsDatabaseMasterSecret-SxCWiw'
+                Resource: !ImportValue RT-dev-Secret-Arn
       Tags:
       - Key: environment
         Value: !Sub ${Environment}
@@ -111,4 +111,4 @@ Outputs:
     Description: echo the EC2 instance ID 
     Value: !Ref EC2ForRails
     Export: 
-      Name: !Sub ${AWS::StackName}-ec2
+      Name: !Sub ${AWS::StackName}-ec2-instance-id

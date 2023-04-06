@@ -83,3 +83,10 @@ Resources:
       SecretId: !Ref MyDBSecret
       TargetId: !Ref MyDBInstance
       TargetType: AWS::RDS::DBInstance
+
+Outputs:
+  MyDBSecret:
+    Description: Information about the secret for db instance
+    Value: !Ref MyDBSecret
+    Export: 
+      Name: !Sub ${SystemName}-${Environment}-Secret-Arn
