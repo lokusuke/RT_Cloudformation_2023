@@ -80,6 +80,25 @@ Resources:
           Value: !Sub ${SystemName}-${Environment}-db-sg
       VpcId: !ImportValue TestVPC-VpcID
 
+#ALB用セキュリティグループ（HTTP）
+  TestALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: security group for the application load-balancer
+      GroupName: Test-alb-sg
+      SecurityGroupIngress: 
+        -   CidrIp: "0.0.0.0/0"
+            Description: for http connection
+            FromPort: 80
+            ToPort: 80
+            IpProtocol: tcp
+      Tags: 
+        - Key: environment
+          Value: !Sub ${Environment}
+        - Key: Name
+          Value: !Sub ${SystemName}-${Environment}-alb-sg
+      VpcId: !ImportValue TestVPC-VpcID
+
 Outputs:
   TestWebSecurityGroup:
     Description: Information about the "TestWebSecurityGroup"
@@ -98,4 +117,10 @@ Outputs:
     Value: !GetAtt TestDBSecurityGroup.GroupId
     Export: 
       Name: !Sub ${AWS::StackName}-TestDBSecurityGroupID
+
+  TestALBSecurityGroup:
+    Description: Information about the "TestALBSecurityGroup"
+    Value: !GetAtt TestALBSecurityGroup.GroupId
+    Export: 
+      Name: !Sub ${AWS::StackName}-TestALBSecurityGroupID
 

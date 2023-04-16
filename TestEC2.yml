@@ -69,12 +69,13 @@ Resources:
             Statement:
               - Effect: Allow
                 Action: 'secretsmanager:GetSecretValue'
-                Resource: !ImportValue RT-dev-Secret-Arn
+                Resource: 
+                  Fn::ImportValue: !Sub '${SystemName}-${Environment}-Secret-Arn'
       Tags:
       - Key: environment
         Value: !Sub ${Environment}
       - Key: Name
-        Value: !Sub ${SystemName}-${Environment}-role-for-ec2
+        Value: !Sub ${SystemName}-${Environment}-role-for-ec2  
 
   InstanceProfile1: # インスタンスプロファイルの作成(EC2へのアタッチに必要)
     Type: 'AWS::IAM::InstanceProfile'
